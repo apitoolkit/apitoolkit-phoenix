@@ -17,10 +17,12 @@ defmodule ApitoolkitPhoenix do
             pubsub_conn: nil
 
   def publishMessage(%{meta_data: meta_data} = %__MODULE__{} = pubsub_client, message) do
+    payload = Jason.encode!(message)
+
     request = %GoogleApi.PubSub.V1.Model.PublishRequest{
       messages: [
         %GoogleApi.PubSub.V1.Model.PubsubMessage{
-          data: Base.encode64(message)
+          data: Base.encode64(payload)
         }
       ]
     }
@@ -92,13 +94,18 @@ defmodule ApitoolkitPhoenix do
     end
   end
 
-  def call(conn, default) do
+  def call(conn, config) do
     start_time = System.monotonic_time()
 
     conn =
       register_before_send(conn, fn conn ->
-        payload = build_payload(conn, start_time, default)
-        IO.inspect(payload)
+        payload = build_payload(conn, start_time, config)
+
+        if(Map.get(config, :debug, false)) do
+          IO.inspect(payload)
+        end
+
+        publishMessage(config, payload)
         conn
       end)
 
@@ -123,6 +130,7 @@ defmodule ApitoolkitPhoenix do
       query_params: conn.query_params,
       service_version: nil,
       tags: [],
+      url_path: conn.request_path,
       proto_major: 1,
       proto_minor: 1,
       project_id: config.project_id,
