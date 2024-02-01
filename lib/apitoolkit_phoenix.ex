@@ -108,7 +108,7 @@ defmodule ApitoolkitPhoenix do
   defp build_payload(conn, start_time, config) do
     raw_url = conn.request_path <> conn.query_string
     body = elem(Jason.encode(conn.body_params), 1)
-    resp_body = Jason.encode!(conn.resp_body)
+    resp_body = IO.iodata_to_binary(conn.resp_body)
     IO.inspect(resp_body)
 
     %{
@@ -128,6 +128,7 @@ defmodule ApitoolkitPhoenix do
       project_id: config.project_id,
       errors: [],
       request_body: Base.encode64(body),
+      response_body: Base.encode64(resp_body),
       sdk_type: "ElixirPhoenix",
       referer: Map.get(conn, "referer", ""),
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
