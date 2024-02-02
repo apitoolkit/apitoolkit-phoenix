@@ -96,27 +96,25 @@ defmodule ApitoolkitPhoenix do
 
   def call(conn, config) do
     start_time = System.monotonic_time()
+    message_id = UUID.uuid4()
+    apitookit = %{message_id: message_id, errors: []}
 
     conn =
       register_before_send(conn, fn conn ->
-        payload = build_payload(conn, start_time, config)
-
-        if(Map.get(config, :debug, false)) do
-          IO.inspect(payload)
-        end
-
+        apitookit = conn.assigns[:apitookit]
+        payload = build_payload(conn, start_time, config, message_id, apitookit.errors)
         publishMessage(config, payload)
         conn
       end)
 
     assign(conn, :locale, "dd")
+    assign(conn, :apitookit, apitookit)
   end
 
-  defp build_payload(conn, start_time, config) do
+  defp build_payload(conn, start_time, config, message_id, errors) do
     raw_url = conn.request_path <> conn.query_string
     body = elem(Jason.encode(conn.body_params), 1)
     resp_body = IO.iodata_to_binary(conn.resp_body)
-    IO.inspect(resp_body)
 
     %{
       duration: System.monotonic_time() - start_time,
@@ -128,16 +126,17 @@ defmodule ApitoolkitPhoenix do
       host: conn.host,
       path_params: conn.path_params,
       query_params: conn.query_params,
-      service_version: nil,
-      tags: [],
+      service_version: Map.get(config, "service_version", nil),
+      tags: Map.get(config, :tags, []),
       url_path: conn.request_path,
       proto_major: 1,
       proto_minor: 1,
       project_id: config.project_id,
-      errors: [],
+      errors: errors,
       request_body: Base.encode64(body),
       response_body: Base.encode64(resp_body),
       sdk_type: "ElixirPhoenix",
+      msg_id: message_id,
       referer: Map.get(conn, "referer", ""),
       timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
     }
@@ -155,5 +154,34 @@ defmodule ApitoolkitPhoenix do
       new_header = if is_redact_key, do: "[CLIENT_REDACTED]", else: value
       Map.put(acc, key, new_header)
     end)
+  end
+
+  def report_error(conn, err) do
+    apitookit = conn.assigns[:apitookit]
+    error = build_error(err)
+    IO.inspect(error)
+    apitookit = Map.put(apitookit, :errors, [error | apitookit.errors])
+    assign(conn, :apitookit, apitookit)
+  end
+
+  def build_error(error) do
+    error_type =
+      error
+      |> :erlang.term_to_binary()
+      |> :erlang.binary_to_term()
+      |> elem(1)
+      |> :erlang.atom_to_binary()
+      |> String.to_atom()
+
+    iso_string = DateTime.utc_now() |> DateTime.to_iso8601()
+
+    %{
+      when: iso_string,
+      error_type: error_type,
+      message: error_type,
+      root_error_type: error_type,
+      root_error_message: error_type,
+      stack_trace: ""
+    }
   end
 end

@@ -28,7 +28,8 @@ defmodule ApitoolkitPhoenix.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8"},
       {:google_api_pub_sub, "~> 0.36.0"},
-      {:goth, "~> 1.0"}
+      {:goth, "~> 1.0"},
+      {:uuid, "~> 1.1"}
     ]
   end
 end
