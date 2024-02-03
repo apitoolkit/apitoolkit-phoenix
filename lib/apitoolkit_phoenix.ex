@@ -19,6 +19,11 @@ defmodule ApitoolkitPhoenix do
   def publishMessage(%{meta_data: meta_data} = %__MODULE__{} = pubsub_client, message) do
     payload = Jason.encode!(message)
 
+    case Map.get(pubsub_client, :debug, false) do
+      true -> IO.inspect(message)
+      false -> nil
+    end
+
     request = %GoogleApi.PubSub.V1.Model.PublishRequest{
       messages: [
         %GoogleApi.PubSub.V1.Model.PubsubMessage{
@@ -35,7 +40,10 @@ defmodule ApitoolkitPhoenix do
         body: request
       )
 
-    IO.inspect("published message #{response.messageIds}")
+    case Map.get(pubsub_client, :debug, false) do
+      true -> IO.inspect("published message #{response.messageIds}")
+      false -> nil
+    end
   end
 
   def init(config) do
@@ -53,8 +61,8 @@ defmodule ApitoolkitPhoenix do
     conn = GoogleApi.PubSub.V1.Connection.new(token.token)
 
     case Map.get(config_map, :debug, false) do
-      true -> nil
-      _ -> IO.inspect("apitoolkit: initialized successfully")
+      true -> IO.inspect("apitoolkit: initialized successfully")
+      _ -> nil
     end
 
     %__MODULE__{
@@ -102,12 +110,12 @@ defmodule ApitoolkitPhoenix do
     conn =
       register_before_send(conn, fn conn ->
         apitookit = conn.assigns[:apitookit]
+        IO.inspect(apitookit)
         payload = build_payload(conn, start_time, config, message_id, apitookit.errors)
         publishMessage(config, payload)
         conn
       end)
 
-    assign(conn, :locale, "dd")
     assign(conn, :apitookit, apitookit)
   end
 
@@ -159,29 +167,23 @@ defmodule ApitoolkitPhoenix do
   def report_error(conn, err) do
     apitookit = conn.assigns[:apitookit]
     error = build_error(err)
-    IO.inspect(error)
     apitookit = Map.put(apitookit, :errors, [error | apitookit.errors])
     assign(conn, :apitookit, apitookit)
   end
 
   def build_error(error) do
-    error_type =
-      error
-      |> :erlang.term_to_binary()
-      |> :erlang.binary_to_term()
-      |> elem(1)
-      |> :erlang.atom_to_binary()
-      |> String.to_atom()
-
     iso_string = DateTime.utc_now() |> DateTime.to_iso8601()
+    kind = error.kind
+    formatted_error = Exception.format(kind, error.reason, [])
+    formatted_stacktrace = Exception.format(kind, error.reason, error.stack)
 
     %{
       when: iso_string,
-      error_type: error_type,
-      message: error_type,
-      root_error_type: error_type,
-      root_error_message: error_type,
-      stack_trace: ""
+      error_type: kind,
+      message: formatted_error,
+      root_error_type: kind,
+      root_error_message: formatted_error,
+      stack_trace: formatted_stacktrace
     }
   end
 end
