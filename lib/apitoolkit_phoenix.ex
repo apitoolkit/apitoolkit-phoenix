@@ -57,7 +57,11 @@ defmodule ApitoolkitPhoenix do
 
     meta_data = get_client_metadata(root_url, apiKey)
 
-    {:ok, token} = Goth.Token.for_scope("https://www.googleapis.com/auth/cloud-platform")
+    {:ok, token} =
+      Goth.Token.fetch(%{
+        source: {:service_account, Map.get(meta_data, "pubsub_push_service_account"), []}
+      })
+
     conn = GoogleApi.PubSub.V1.Connection.new(token.token)
 
     case Map.get(config_map, :debug, false) do
@@ -110,7 +114,6 @@ defmodule ApitoolkitPhoenix do
     conn =
       register_before_send(conn, fn conn ->
         apitookit = conn.assigns[:apitookit]
-        IO.inspect(apitookit)
         payload = build_payload(conn, start_time, config, message_id, apitookit.errors)
         publishMessage(config, payload)
         conn
@@ -167,7 +170,8 @@ defmodule ApitoolkitPhoenix do
   def report_error(conn, err) do
     apitookit = conn.assigns[:apitookit]
     error = build_error(err)
-    apitookit = Map.put(apitookit, :errors, [error | apitookit.errors])
+    errors = Map.get(apitookit, :errors, [])
+    apitookit = Map.put(apitookit, :errors, [error | errors])
     assign(conn, :apitookit, apitookit)
   end
 
