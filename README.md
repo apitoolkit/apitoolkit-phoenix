@@ -1,6 +1,6 @@
 # ApitoolkitPhoenix
 
-**TODO: Add description**
+APIToolkit sdk for elixir phoenix.
 
 ## Installation
 
@@ -14,8 +14,81 @@ def deps do
   ]
 end
 ```
+Run `mix deps.get` to install the `apitoolkit_phoenix` dependency 
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/apitoolkit_phoenix>.
+Import and initialize the `ApitoolkitPhoenix` Plug in your `router.ex` file.
 
+```elixir
+defmodule HelloWeb.Router do
+  use HelloWeb, :router
+  use Plug.ErrorHandler
+  import HelloWeb.Plugs.Locale
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :put_secure_browser_headers
+    # Other plugs
+    plug APIToolkitPhoenix,
+      config: %{
+        api_key: "z6EYf5FMa3gzzNUfgKZsHjtN9GLETNaev7/v0LkNozFQ89nH",
+      }
+  end
+end
+```
+
+## Redacting Sensitive Data
+
+Some information is best kept private. Our phoenix client supports redaction right on your servers. This means sensitive data like passwords or credit card numbers never leave your premises. To mark fields that should be redacted, Add them to the apitoolkit config struct. Here’s how you do it:
+
+```elixir
+defmodule HelloWeb.Router do
+  use HelloWeb, :router
+  use Plug.ErrorHandler
+  import HelloWeb.Plugs.Locale
+
+  pipeline :browser do
+    plug :protect_from_forgery
+    # other plugs
+    plug APIToolkitPhoenix,
+      config: %{
+        api_key: "z6EYf5FMa3gzzNUfgKZsHjtN9GLETNaev7/v0LkNozFQ89nH",
+        redact_headers: ["accept-language", "cookie", "x-csrf-token"]
+      }
+  end
+end
+```
+
+## Report Errors
+
+If you’ve used sentry, or bugsnag, or rollbar, then you’re already familiar with this usecase.
+But you can report an error to apitoolkit. A difference, is that errors are always associated with a parent request, and helps you query and associate the errors which occured while serving a given customer request. To report errors to APIToolkit use call the `report_error` method of the `APIToolkitPhoenix` module
+
+To to automatically report all uncaught exceptions, call the `report_error` function passing it the connection and the error in the `handle_errors` function.
+
+```elixir
+  @impl Plug.ErrorHandler
+  def handle_errors(conn, err) do
+    conn = report_error(conn, err)
+    json(conn, %{message: "Something went wrong"})
+  end
+```
+
+You can also report errors manually by calling `report_error` on anywhere within a controller, also passing it the connection and the error
+Example:
+```elixir
+defmodule HelloWeb.PageController do
+  use HelloWeb, :controller
+  import HelloWeb.Plugs.Locale
+
+  def home(conn, _params) do
+    try do
+      raise("Ooops something went wrong")
+    rescue
+      err ->
+        report_error(conn, err)
+    end
+
+    json(conn, %{message: "Hello, world!"})
+  end
+end
+```

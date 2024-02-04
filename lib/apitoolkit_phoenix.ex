@@ -168,11 +168,19 @@ defmodule ApitoolkitPhoenix do
   end
 
   def report_error(conn, err) do
-    apitookit = conn.assigns[:apitookit]
-    error = build_error(err)
-    errors = Map.get(apitookit, :errors, [])
-    apitookit = Map.put(apitookit, :errors, [error | errors])
-    assign(conn, :apitookit, apitookit)
+    try do
+      apitookit = conn.assigns[:apitookit]
+      error = build_error(err)
+      errors = Map.get(apitookit, :errors, [])
+      apitookit = Map.put(apitookit, :errors, [error | errors])
+      assign(conn, :apitookit, apitookit)
+    rescue
+      _ ->
+        conn
+    catch
+      _err ->
+        conn
+    end
   end
 
   def build_error(error) do
