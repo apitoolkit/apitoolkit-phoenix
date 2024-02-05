@@ -170,24 +170,34 @@ defmodule ApitoolkitPhoenix do
   def report_error(conn, err) do
     try do
       apitookit = conn.assigns[:apitookit]
-      error = build_error(err)
+      error = build_error(err.kind, err.reason, err.stack)
       errors = Map.get(apitookit, :errors, [])
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)
     rescue
       _ ->
         conn
-    catch
+    end
+  end
+
+  def report_error(conn, err, stacktrace) do
+    try do
+      apitookit = conn.assigns[:apitookit]
+      error = build_error(:error, err, stacktrace)
+      errors = Map.get(apitookit, :errors, [])
+      apitookit = Map.put(apitookit, :errors, [error | errors])
+      assign(conn, :apitookit, apitookit)
+    rescue
       _err ->
         conn
     end
   end
 
-  def build_error(error) do
+  def build_error(kind, reason, stack) do
     iso_string = DateTime.utc_now() |> DateTime.to_iso8601()
-    kind = error.kind
-    formatted_error = Exception.format(kind, error.reason, [])
-    formatted_stacktrace = Exception.format(kind, error.reason, error.stack)
+    kind = kind
+    formatted_error = Exception.format(kind, reason, [])
+    formatted_stacktrace = Exception.format(kind, reason, stack)
 
     %{
       when: iso_string,
