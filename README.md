@@ -4,7 +4,7 @@ APIToolkit SDK for Elixir Phoenix.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed by adding `apitoolkit_phoenix` to your list of dependencies in `mix.exs`:
+Install the SDK by adding `apitoolkit_phoenix` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -24,13 +24,12 @@ defmodule HelloWeb.Router do
   use Plug.ErrorHandler
   import HelloWeb.Plugs.Locale
 
-  pipeline :browser do
-    plug :accepts, ["html"]
-    plug :put_secure_browser_headers
+  pipeline :api do
+    plug :accepts, ["json"]
     # Other plugs
     plug APIToolkitPhoenix,
       config: %{
-        api_key: "z6EYf5FMa3gzzNUfgKZsHjtN9GLETNaev7/v0LkNozFQ89nH",
+        api_key: "<YOUR_API_KEY>",
       }
   end
 end
@@ -46,12 +45,12 @@ defmodule HelloWeb.Router do
   use Plug.ErrorHandler
   import HelloWeb.Plugs.Locale
 
-  pipeline :browser do
-    plug :protect_from_forgery
+  pipeline :api do
+    plug :accepts, ["json"]
     # Other plugs
     plug APIToolkitPhoenix,
       config: %{
-        api_key: "z6EYf5FMa3gzzNUfgKZsHjtN9GLETNaev7/v0LkNozFQ89nH",
+        api_key: "<YOUR_API_KEY>",
         redact_headers: ["accept-language", "cookie", "x-csrf-token"]
       }
   end
