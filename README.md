@@ -30,6 +30,9 @@ defmodule HelloWeb.Router do
     plug APIToolkitPhoenix,
       config: %{
         api_key: "<YOUR_API_KEY>",
+        # we need this to get route_info
+        # eg: get matched route pattern
+        router: HelloWeb.Router # replace with your Router module
       }
   end
 end
@@ -56,6 +59,11 @@ defmodule HelloWeb.Router do
   end
 end
 ```
+
+## Redacting Request and Response bodies
+
+The phoenix sdk doesn't support redacting request and response bodies yet. You can however redact request and response bodies from you APIToolkit dashboard
+by going to app.apitoolkit.io/p/<YOUR_PROJECT_ID>/redacted_fields
 
 ## Reporting Errors
 
