@@ -189,7 +189,6 @@ defmodule ApitoolkitPhoenix do
     try do
       apitookit = conn.assigns[:apitookit]
       error = build_error(:error, err, stacktrace)
-      IO.inspect(error)
       errors = Map.get(apitookit, :errors, [])
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)
