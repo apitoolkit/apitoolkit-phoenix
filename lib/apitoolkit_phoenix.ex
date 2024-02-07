@@ -14,8 +14,7 @@ defmodule ApitoolkitPhoenix do
             api_key: nil,
             meta_data: nil,
             debug: false,
-            pubsub_conn: nil,
-            router: nil
+            pubsub_conn: nil
 
   def publishMessage(%{meta_data: meta_data} = %__MODULE__{} = pubsub_client, message) do
     payload = Jason.encode!(message)
@@ -79,8 +78,7 @@ defmodule ApitoolkitPhoenix do
       api_key: apiKey,
       meta_data: meta_data,
       debug: Map.get(config_map, :debug, false),
-      pubsub_conn: conn,
-      router: Map.get(config_map, :router)
+      pubsub_conn: conn
     }
   end
 
@@ -115,9 +113,15 @@ defmodule ApitoolkitPhoenix do
 
     conn =
       register_before_send(conn, fn conn ->
-        apitookit = conn.assigns[:apitookit]
-        payload = build_payload(conn, start_time, config, message_id, apitookit.errors)
-        publishMessage(config, payload)
+        try do
+          apitookit = conn.assigns[:apitookit]
+          payload = build_payload(conn, start_time, config, message_id, apitookit.errors)
+          publishMessage(config, payload)
+          conn
+        rescue
+          _err -> conn
+        end
+
         conn
       end)
 
@@ -128,9 +132,10 @@ defmodule ApitoolkitPhoenix do
     raw_url = conn.request_path <> conn.query_string
     body = elem(Jason.encode(conn.body_params), 1)
     resp_body = IO.iodata_to_binary(conn.resp_body)
+    router = conn.private.phoenix_router
 
     route_info =
-      Phoenix.Router.route_info(config.router, conn.method, conn.request_path, conn.host)
+      Phoenix.Router.route_info(router, conn.method, conn.request_path, conn.host)
 
     %{
       duration: System.monotonic_time() - start_time,
@@ -180,7 +185,8 @@ defmodule ApitoolkitPhoenix do
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)
     rescue
-      _err ->
+      err ->
+        IO.inspect(err)
         conn
     end
   end
@@ -189,6 +195,7 @@ defmodule ApitoolkitPhoenix do
     try do
       apitookit = conn.assigns[:apitookit]
       error = build_error(:error, err, stacktrace)
+      IO.inspect(error)
       errors = Map.get(apitookit, :errors, [])
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)

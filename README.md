@@ -9,7 +9,7 @@ Install the SDK by adding `apitoolkit_phoenix` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:apitoolkit_phoenix, "~> 0.1.0"}
+    {:apitoolkit_phoenix, "~> 0.1.1"}
   ]
 end
 ```
@@ -30,9 +30,6 @@ defmodule HelloWeb.Router do
     plug APIToolkitPhoenix,
       config: %{
         api_key: "<YOUR_API_KEY>",
-        # we need this to get route_info
-        # eg: get matched route pattern
-        router: HelloWeb.Router # replace with your Router module
       }
   end
 end
