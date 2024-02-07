@@ -22,12 +22,12 @@ Import and initialize the `ApitoolkitPhoenix` Plug in your `router.ex` file.
 defmodule HelloWeb.Router do
   use HelloWeb, :router
   use Plug.ErrorHandler
-  import APIToolkitPhoenix
+  import ApitoolkitPhoenix
 
   pipeline :api do
     plug :accepts, ["json"]
     # Other plugs
-    plug APIToolkitPhoenix,
+    plug ApitoolkitPhoenix,
       config: %{
         api_key: "<YOUR_API_KEY>",
       }
@@ -43,12 +43,12 @@ Some information is best kept private. Our Phoenix client supports redaction rig
 defmodule HelloWeb.Router do
   use HelloWeb, :router
   use Plug.ErrorHandler
-  import APIToolkitPhoenix
+  import ApitoolkitPhoenix
 
   pipeline :api do
     plug :accepts, ["json"]
     # Other plugs
-    plug APIToolkitPhoenix,
+    plug ApitoolkitPhoenix,
       config: %{
         api_key: "<YOUR_API_KEY>",
         redact_headers: ["accept-language", "cookie", "x-csrf-token"]
@@ -64,7 +64,7 @@ by going to app.apitoolkit.io/p/<YOUR_PROJECT_ID>/redacted_fields
 
 ## Reporting Errors
 
-If you’ve used Sentry, Bugsnag, or Rollbar, then you’re already familiar with this use case. But you can report an error to APIToolkit. A difference is that errors are always associated with a parent request, helping you query and associate the errors which occurred while serving a given customer request. To report errors to APIToolkit, use the `report_error` method of the `APIToolkitPhoenix` module.
+If you’ve used Sentry, Bugsnag, or Rollbar, then you’re already familiar with this use case. But you can report an error to APIToolkit. A difference is that errors are always associated with a parent request, helping you query and associate the errors which occurred while serving a given customer request. To report errors to APIToolkit, use the `report_error` method of the `ApitoolkitPhoenix` module.
 
 To automatically report all uncaught exceptions, call the `report_error` function passing it the connection and the error in the `handle_errors` function.
 
@@ -83,7 +83,7 @@ Example:
 ```elixir
 defmodule HelloWeb.PageController do
   use HelloWeb, :controller
-  import APIToolkitPhoenix
+  import ApitoolkitPhoenix
 
   def home(conn, _params) do
     try do
