@@ -1,14 +1,18 @@
 defmodule ApitoolkitPhoenix.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/apitoolkit/apitoolkit-phoenix"
+  @version "0.1.0"
+
   def project do
     [
       app: :apitoolkit_phoenix,
-      version: "0.1.0",
+      version: @version,
       description: "APIToolkit's Phoenix integration sdks",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package()
     ]
   end
 
@@ -32,6 +36,14 @@ defmodule ApitoolkitPhoenix.MixProject do
       {:goth, "~> 1.0"},
       {:uuid, "~> 1.1"},
       {:phoenix, "~> 1.7.10"}
+    ]
+  end
+
+  defp package() do
+    [
+      maintainers: ["Yussif Mohammed"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => @source_url}
     ]
   end
 end
