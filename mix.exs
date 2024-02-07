@@ -12,7 +12,8 @@ defmodule ApitoolkitPhoenix.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: package()
+      package: package(),
+      docs: docs()
     ]
   end
 
@@ -44,6 +45,17 @@ defmodule ApitoolkitPhoenix.MixProject do
       maintainers: ["Yussif Mohammed"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url}
+    ]
+  end
+
+  defp docs() do
+    [
+      main: "readme",
+      name: "apitoolkit_phoenix",
+      source_ref: "v#{@version}",
+      canonical: "http://hexdocs.pm/apitoolkit_phoenix",
+      source_url: @source_url,
+      extras: ["README.md", "LICENSE"]
     ]
   end
 end
