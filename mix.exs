@@ -29,7 +29,8 @@ defmodule ApitoolkitPhoenix.MixProject do
       {:httpoison, "~> 1.8"},
       {:google_api_pub_sub, "~> 0.36.0"},
       {:goth, "~> 1.0"},
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      {:phoenix, "~> 1.7.10"}
     ]
   end
 end

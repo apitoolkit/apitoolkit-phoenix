@@ -14,7 +14,8 @@ defmodule ApitoolkitPhoenix do
             api_key: nil,
             meta_data: nil,
             debug: false,
-            pubsub_conn: nil
+            pubsub_conn: nil,
+            router: nil
 
   def publishMessage(%{meta_data: meta_data} = %__MODULE__{} = pubsub_client, message) do
     payload = Jason.encode!(message)
@@ -78,7 +79,8 @@ defmodule ApitoolkitPhoenix do
       api_key: apiKey,
       meta_data: meta_data,
       debug: Map.get(config_map, :debug, false),
-      pubsub_conn: conn
+      pubsub_conn: conn,
+      router: Map.get(config_map, :router)
     }
   end
 
@@ -127,6 +129,9 @@ defmodule ApitoolkitPhoenix do
     body = elem(Jason.encode(conn.body_params), 1)
     resp_body = IO.iodata_to_binary(conn.resp_body)
 
+    route_info =
+      Phoenix.Router.route_info(config.router, conn.method, conn.request_path, conn.host)
+
     %{
       duration: System.monotonic_time() - start_time,
       raw_url: raw_url,
@@ -139,7 +144,7 @@ defmodule ApitoolkitPhoenix do
       query_params: conn.query_params,
       service_version: Map.get(config, "service_version", nil),
       tags: Map.get(config, :tags, []),
-      url_path: conn.request_path,
+      url_path: route_info.route,
       proto_major: 1,
       proto_minor: 1,
       project_id: config.project_id,
@@ -175,7 +180,7 @@ defmodule ApitoolkitPhoenix do
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)
     rescue
-      _ ->
+      _err ->
         conn
     end
   end
@@ -184,6 +189,7 @@ defmodule ApitoolkitPhoenix do
     try do
       apitookit = conn.assigns[:apitookit]
       error = build_error(:error, err, stacktrace)
+      IO.inspect(error)
       errors = Map.get(apitookit, :errors, [])
       apitookit = Map.put(apitookit, :errors, [error | errors])
       assign(conn, :apitookit, apitookit)
