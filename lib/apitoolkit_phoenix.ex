@@ -130,9 +130,24 @@ defmodule ApitoolkitPhoenix do
 
   defp build_payload(conn, start_time, config, message_id, errors) do
     raw_url = conn.request_path <> conn.query_string
-    body = elem(Jason.encode(conn.body_params), 1)
-    resp_body = IO.iodata_to_binary(conn.resp_body)
+    redacted_req_body = redact_fields(conn.body_params, Map.get(config, :redact_request_body))
     router = conn.private.phoenix_router
+
+    body = Jason.encode!(redacted_req_body)
+
+    resp_body =
+      try do
+        redacted_res_body =
+          redact_fields(
+            Jason.decode!(IO.iodata_to_binary(conn.resp_body)),
+            Map.get(config, :redact_response_body, [])
+          )
+
+        Jason.encode!(redacted_res_body)
+      rescue
+        _err ->
+          IO.iodata_to_binary(conn.resp_body)
+      end
 
     route_info =
       Phoenix.Router.route_info(router, conn.method, conn.request_path, conn.host)
@@ -175,6 +190,17 @@ defmodule ApitoolkitPhoenix do
       new_header = if is_redact_key, do: "[CLIENT_REDACTED]", else: value
       Map.put(acc, key, new_header)
     end)
+  end
+
+  def redact_fields(data, fields_to_redact) do
+    try do
+      Enum.reduce(fields_to_redact, data, fn field, acc_data ->
+        Elixpath.update(acc_data, field, "[CLIENT_REDACTED]")
+      end)
+    rescue
+      _err ->
+        data
+    end
   end
 
   def report_error(conn, err) do

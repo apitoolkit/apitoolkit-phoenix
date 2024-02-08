@@ -36,7 +36,8 @@ defmodule ApitoolkitPhoenix.MixProject do
       {:google_api_pub_sub, "~> 0.36.0"},
       {:goth, "~> 1.0"},
       {:uuid, "~> 1.1"},
-      {:phoenix, "~> 1.7.10"}
+      {:phoenix, "~> 1.7.10"},
+      {:nimble_parsec, "~> 0.5 or ~>1.0", runtime: false}
     ]
   end
 
