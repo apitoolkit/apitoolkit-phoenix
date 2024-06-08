@@ -65,7 +65,7 @@ end
 
 > [!IMPORTANT]
 > 
-> To learn more configuration options (redacting fields, error reporting, outgoing requests, etc.) please read our comprehensive [Phoenix SDK](https://apitoolkit.io/docs/sdks/elixir/phoenix?utm_source=github-sdk) documentation.
+> To learn more configuration options (redacting fields, error reporting, outgoing requests, etc.), please read this [SDK documentation](https://apitoolkit.io/docs/sdks/elixir/phoenix?utm_source=github-sdk).
 
 ## Contributing and Help
 
