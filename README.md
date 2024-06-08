@@ -1,10 +1,30 @@
-# ApitoolkitPhoenix
+<div align="center">
 
-APIToolkit SDK for Elixir Phoenix.
+![APItoolkit's Logo](https://github.com/apitoolkit/.github/blob/main/images/logo-white.svg?raw=true#gh-dark-mode-only)
+![APItoolkit's Logo](https://github.com/apitoolkit/.github/blob/main/images/logo-black.svg?raw=true#gh-light-mode-only)
+
+## Phoenix SDK
+
+[![APItoolkit SDK](https://img.shields.io/badge/APItoolkit-SDK-0068ff?logo=elixir)](https://github.com/topics/apitoolkit-sdk) [![Join Discord Server](https://img.shields.io/badge/Chat-Discord-7289da)](https://discord.gg/dEB6EjQnKB) [![APItoolkit Docs](https://img.shields.io/badge/Read-Docs-0068ff)](https://apitoolkit.io/docs/sdks/elixir/phoenix?utm_source=github-sdk) 
+
+APItoolkit is an end-to-end API and web services management toolkit for engineers and customer support teams. To integrate `.Net` web services with APItoolkit, you need to use this SDK to monitor incoming traffic, aggregate the requests, and then deliver them to the APItoolkit's servers.
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Contributing and Help](#contributing-and-help)
+- [License](#license)
+
+---
 
 ## Installation
 
-Install the SDK by adding `apitoolkit_phoenix` to your list of dependencies in `mix.exs`:
+To install the SDK, kindly add `apitoolkit_phoenix` to your list of dependencies in the `mix.exs` file like so:
 
 ```elixir
 def deps do
@@ -14,30 +34,11 @@ def deps do
 end
 ```
 
-Run `mix deps.get` to install the `apitoolkit_phoenix` dependency.
+Then, run the `mix deps.get` command to install the `apitoolkit_phoenix` dependency.
 
-Import and initialize the `ApitoolkitPhoenix` Plug in your `router.ex` file.
+## Configuration
 
-```elixir
-defmodule HelloWeb.Router do
-  use HelloWeb, :router
-  use Plug.ErrorHandler
-  import ApitoolkitPhoenix
-
-  pipeline :api do
-    plug :accepts, ["json"]
-    # Other plugs
-    plug ApitoolkitPhoenix,
-      config: %{
-        api_key: "<YOUR_API_KEY>",
-      }
-  end
-end
-```
-
-## Redacting Sensitive Data
-
-Some information is best kept private. Our Phoenix client supports redaction right on your servers. This means sensitive data like passwords or credit card numbers never leave your premises. To mark fields that should be redacted, add them to the APIToolkit config map. Here’s how you do it:
+Next, import and initialize the `ApitoolkitPhoenix` Plug in your `router.ex` file like so:
 
 ```elixir
 defmodule HelloWeb.Router do
@@ -50,47 +51,37 @@ defmodule HelloWeb.Router do
     # Other plugs
     plug ApitoolkitPhoenix,
       config: %{
-        api_key: "<YOUR_API_KEY>",
-        redact_headers: ["accept-language", "cookie", "x-csrf-token"] # list of headers to be redacted
-        redact_request_body: [".user.password", ".user.credit_card"] # list of json paths to redact from request body
-        redact_response_body: [".users[*].email"] # list of json paths to redact from response body
+        api_key: "{ENTER_YOUR_API_KEY_HERE}",
       }
   end
 end
 ```
 
-## Reporting Errors
+> [!NOTE]
+> 
+> The `{ENTER_YOUR_API_KEY_HERE}` demo string should be replaced with the [API key](https://apitoolkit.io/docs/dashboard/settings-pages/api-keys?utm_source=github-sdk) generated from the APItoolkit dashboard.
 
-If you’ve used Sentry, Bugsnag, or Rollbar, then you’re already familiar with this use case. But you can report an error to APIToolkit. A difference is that errors are always associated with a parent request, helping you query and associate the errors which occurred while serving a given customer request. To report errors to APIToolkit, use the `report_error` method of the `ApitoolkitPhoenix` module.
+<br />
 
-To automatically report all uncaught exceptions, call the `report_error` function passing it the connection and the error in the `handle_errors` function.
+> [!IMPORTANT]
+> 
+> To learn more configuration options (redacting fields, error reporting, outgoing requests, etc.) please read our comprehensive [Phoenix SDK](https://apitoolkit.io/docs/sdks/elixir/phoenix?utm_source=github-sdk) documentation.
 
-```elixir
-@impl Plug.ErrorHandler
-def handle_errors(conn, err) do
-  conn = report_error(conn, err)
-  json(conn, %{message: "Something went wrong"})
-end
-```
+## Contributing and Help
 
-You can also report errors manually by calling `report_error` from anywhere within a controller, also passing it the connection, the error and `__STACKTRACE__`.
+To contribute to the development of this SDK or request help from the community and our team, kindly do any of the following:
+- Read our [Contributors Guide](https://github.com/apitoolkit/.github/blob/main/CONTRIBUTING.md).
+- Join our community [Discord Server](https://discord.gg/dEB6EjQnKB).
+- Create a [new issue](https://github.com/apitoolkit/apitoolkit-dotnet/issues/new/choose) in this repository.
 
-Example:
+## License
 
-```elixir
-defmodule HelloWeb.PageController do
-  use HelloWeb, :controller
-  import ApitoolkitPhoenix
+This repository is published under the [MIT](LICENSE) license.
 
-  def home(conn, _params) do
-    try do
-      raise("Oops, something went wrong")
-    rescue
-      err ->
-        report_error(conn, err, __STACKTRACE__)
-    end
+---
 
-    json(conn, %{message: "Hello, world!"})
-  end
-end
-```
+<div align="center">
+    
+<a href="https://apitoolkit.io?utm_source=apitoolkit_github_dotnetsdk" target="_blank" rel="noopener noreferrer"><img src="https://github.com/apitoolkit/.github/blob/main/images/icon.png?raw=true" width="40" /></a>
+
+</div>
