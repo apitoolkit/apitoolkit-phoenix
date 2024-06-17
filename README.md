@@ -72,7 +72,7 @@ end
 To contribute to the development of this SDK or request help from the community and our team, kindly do any of the following:
 - Read our [Contributors Guide](https://github.com/apitoolkit/.github/blob/main/CONTRIBUTING.md).
 - Join our community [Discord Server](https://discord.gg/dEB6EjQnKB).
-- Create a [new issue](https://github.com/apitoolkit/apitoolkit-dotnet/issues/new/choose) in this repository.
+- Create a [new issue](https://github.com/apitoolkit/apitoolkit-phoenix/issues/new/choose) in this repository.
 
 ## License
 
