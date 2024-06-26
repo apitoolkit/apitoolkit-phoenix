@@ -52,6 +52,7 @@ defmodule HelloWeb.Router do
     plug ApitoolkitPhoenix,
       config: %{
         api_key: "{ENTER_YOUR_API_KEY_HERE}",
+        debug: false,
       }
   end
 end
